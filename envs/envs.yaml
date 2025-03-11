@@ -1,0 +1,18 @@
+channels:
+ - bioconda
+ - conda-forge
+dependencies:
+  - bamtools
+  - bcftools
+  - bedtools
+  - bwa
+  - fastp
+  - fastqc
+  - glnexus
+  - jemalloc
+  - multiqc
+  - matplotlib
+  - pandas
+  - samtools
+  - vcftools
+  - qualimap
