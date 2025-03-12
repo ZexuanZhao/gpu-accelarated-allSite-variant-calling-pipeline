@@ -27,5 +27,4 @@ rule all:
     shell:
         """
         echo "Job done!"
-        echo "Use the following command to clean up temporary files (needs sudo):"
         """

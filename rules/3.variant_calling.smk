@@ -155,9 +155,12 @@ rule mergeVcfs:
         10
     log:
         os.path.join(config["outdir"],"logs","mergeVcfs","mergeVcfs.log")
+    resources:
+        mem_gb = int(round(get_total_memory_gb() * 0.8, 0))
     shell:
         """
         gatk \
+            --java-options "-Xmx{resources.mem_gb}g" \
             MergeVcfs \
             {params.input_formatted} \
             O={output} \

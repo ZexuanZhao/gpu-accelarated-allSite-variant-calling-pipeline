@@ -15,6 +15,6 @@ w_size: 100000
 ### reference genome size
 genome_size: 10000000
 ### number of intervals to call variants independently as gatk don't do parallelism by default
-split_n: 6
+split_n: 100
 ### memory limit for EACH interval (Gb)
-memory_gb_per_interval: 100
+memory_gb_per_interval: 1

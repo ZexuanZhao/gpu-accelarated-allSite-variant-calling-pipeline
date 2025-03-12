@@ -15,3 +15,9 @@ def format_input_vcfs(input_vcfs):
     for i, vcf_path in enumerate(input_vcfs):
         formatted_vcfs.append(f"I={vcf_path}")
     return " ".join(formatted_vcfs)
+
+def get_total_memory_gb():
+    import psutil
+    mem_bytes = psutil.virtual_memory().total
+    mem_gb = mem_bytes / (1024 ** 3)
+    return mem_gb
