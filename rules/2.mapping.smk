@@ -16,6 +16,8 @@ rule index_reference:
     output:
         ref_bwt = os.path.join(config["outdir"], "ref", "ref.fasta.bwt"),
         ref_fai = os.path.join(config["outdir"], "ref", "ref.fasta.fai")
+    log:
+        os.path.join(config["outdir"],"logs","index_ref","index_ref.log")
     shell:
         """
         bwa index {input.ref}
@@ -29,6 +31,8 @@ rule bwa_gpu:
         ref_bwt = os.path.join(config["outdir"], "ref", "ref.fasta.bwt"),
     output:
         os.path.join(config["outdir"], "bam", "{sample}.bam")
+    params:
+        tag = "@RG\\tID:" + "{sample}" + "\\tLB:lib1\\tPL:Illumina" + "\\tSM:" + "{sample}" + "\\tPU:unit1"
     log:
         os.path.join(config["outdir"],"logs","mapping","{sample}.log")
     threads:
@@ -42,7 +46,7 @@ rule bwa_gpu:
             pbrun fq2bam \
                 --low-memory \
                 --ref {input.copied_ref} \
-                --in-fq {input.r1} {input.r2} \
+                --in-fq {input.r1} {input.r2} "{params.tag}" \
                 --out-bam {output} \
             > {log} \
             2>{log}

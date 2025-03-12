@@ -78,29 +78,32 @@ rule Qualimap:
         outdir =  os.path.join(config["outdir"],"qc","qualimap","{sample}")
     threads:
         4
+    log:
+        os.path.join(config["outdir"],"logs","Qualimap","{sample}.log")
     shell:
         """
         qualimap bamqc \
             -bam {input} \
             -outdir {params.outdir}\
             -outformat HTML \
-            -nt {threads}
+            -nt {threads} \
+            > {log} \
+            2>{log}
         """
-
 
 ## vcf stats using bcftools
 rule vcf_stats:
     conda:
         os.path.join(workflow.basedir, "envs/envs.yaml")
     input:
-        vcf = os.path.join(config["outdir"],"vcf", config["project"]+".vcf.gz")
+        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
     output:
-        vcf_stat = os.path.join(config["outdir"],"qc","bcftools_stats", config["project"]+".vcf.stats")
+        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.stats")
     threads:
         1
     shell:
         """
-        bcftools stats {input.vcf} > {output.vcf_stat}
+        bcftools stats {input} > {output}
         """
 
 ## Visualize vcf stats
@@ -108,9 +111,9 @@ rule plot_vcfstats:
     conda:
         os.path.join(workflow.basedir, "envs/envs.yaml")
     input:
-        vcf_stat = os.path.join(config["outdir"],"qc","bcftools_stats", config["project"]+".vcf.stats")
+        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.stats")
     output:
-        plot_vcfstats = os.path.join(config["outdir"],"qc","bcftools_stats", "plot-vcfstats.log")
+        os.path.join(config["outdir"],"qc","bcftools_stats", "plot-vcfstats.log")
     params:
         outdir = os.path.join(config["outdir"],"qc","bcftools_stats")
     threads:
@@ -120,7 +123,7 @@ rule plot_vcfstats:
         plot-vcfstats \
             -p {params.outdir} \
             --no-PDF \
-            {input.vcf_stat}
+            {input}
         """
 
 ## Quality check of vcf files using vcftools
@@ -128,7 +131,7 @@ rule qc_vcf:
     conda:
         os.path.join(workflow.basedir, "envs/envs.yaml")
     input:
-        vcf = os.path.join(config["outdir"],"vcf", config["project"]+".vcf.gz")
+        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".SNPonly" + ".lcm" + ".HQ" + ".vcf.gz")
     output:
         os.path.join(config["outdir"], "qc", "vcftools", config["project"]+".het")
     params:
@@ -136,15 +139,17 @@ rule qc_vcf:
         proj = config["project"]
     threads:
         1
+    log:
+        os.path.join(config["outdir"],"logs","vcftools","vcftools.log")
     shell:
         """
-        vcftools --gzvcf {input.vcf} --freq2 --max-alleles 2 --out {params.outdir}/{params.proj}
-        vcftools --gzvcf {input.vcf} --depth --out {params.outdir}/{params.proj}
-        vcftools --gzvcf {input.vcf} --site-mean-depth --out {params.outdir}/{params.proj}
-        vcftools --gzvcf {input.vcf} --site-quality --out {params.outdir}/{params.proj}
-        vcftools --gzvcf {input.vcf} --missing-indv --out {params.outdir}/{params.proj}
-        vcftools --gzvcf {input.vcf} --missing-site --out {params.outdir}/{params.proj}
-        vcftools --gzvcf {input.vcf} --het --out {params.outdir}/{params.proj}
+        vcftools --gzvcf {input} --freq2 --max-alleles 2 --out {params.outdir}/{params.proj} >{log} 2>{log}
+        vcftools --gzvcf {input} --depth --out {params.outdir}/{params.proj} >{log} 2>{log}
+        vcftools --gzvcf {input} --site-mean-depth --out {params.outdir}/{params.proj} >{log} 2>{log}
+        vcftools --gzvcf {input} --site-quality --out {params.outdir}/{params.proj} >{log} 2>{log}
+        vcftools --gzvcf {input} --missing-indv --out {params.outdir}/{params.proj} >{log} 2>{log}
+        vcftools --gzvcf {input} --missing-site --out {params.outdir}/{params.proj} >{log} 2>{log}
+        vcftools --gzvcf {input} --het --out {params.outdir}/{params.proj} >{log} 2>{log}
         """
 
 ## Summarize all qc files using multiqc
@@ -156,7 +161,7 @@ rule multiqc:
         expand(os.path.join(config["outdir"],"qc", "fastqc", "{sample}.{R}_fastqc.zip"), sample= sample_sheet.index, R=["1P", "2P"]),
         expand(os.path.join(config["outdir"], "qc", "bamtools","{sample}_bamtools.stats"), sample= sample_sheet.index),
         expand(os.path.join(config["outdir"],"qc","fastp","{sample}.fastp.json"), sample= sample_sheet.index),
-        os.path.join(config["outdir"],"qc","bcftools_stats", config["project"]+".vcf.stats")
+        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.stats")
     output:
         os.path.join(config["outdir"],"qc","multiqc", config["project"]+"_multiqc_report.html")
     params:
@@ -165,11 +170,14 @@ rule multiqc:
         original_output = os.path.join(config["outdir"],"qc", "multiqc", "multiqc_report.html")
     threads:
         1
+    log:
+        os.path.join(config["outdir"],"logs","multiqc","multiqc.log")
     shell:
         """
         rm -rf {params.output_dir}/* ; \
         multiqc \
         -o {params.output_dir} \
-        {params.input_dir} ; \
+        {params.input_dir} \
+        >{log} 2>{log}; \
         mv {params.original_output} {output}
         """

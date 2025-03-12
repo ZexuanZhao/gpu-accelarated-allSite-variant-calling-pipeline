@@ -9,3 +9,9 @@ def get_fastq2(wildcards):
 def get_fastq2_basename(wildcards):
     return {"r1_name": wildcards.sample + ".1P.fastq.gz",
             "r2_name": wildcards.sample + ".2P.fastq.gz"}
+
+def format_input_vcfs(input_vcfs):
+    formatted_vcfs = []
+    for i, vcf_path in enumerate(input_vcfs):
+        formatted_vcfs.append(f"I={vcf_path}")
+    return " ".join(formatted_vcfs)

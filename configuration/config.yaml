@@ -6,10 +6,15 @@ reference: "test_data/test_mutated.fasta"
 sample_sheet: "test_data/sample_sheet.csv"
 outdir: "test_variant_calling"
 
-## Docker image list
+## Docker image path
 clara-parabricks: "docker://nvcr.io/nvidia/clara/clara-parabricks:4.4.0-1"
-deepvariant: "docker://google/deepvariant:1.8.0_saved_model-gpu"
 
 ## Some parameters
-### windows size for calculate metrics
-w_size: 100*1000
+### windows size for calculate coverages
+w_size: 100000
+### reference genome size
+genome_size: 10000000
+### number of intervals to call variants independently as gatk don't do parallelism by default
+split_n: 6
+### memory limit for EACH interval (Gb)
+memory_gb_per_interval: 100
