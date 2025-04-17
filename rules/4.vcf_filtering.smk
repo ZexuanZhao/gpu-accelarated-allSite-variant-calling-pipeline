@@ -57,13 +57,32 @@ rule removeLowComplexityVariant:
             > {output}
         """
 
+rule getNonVariant:
+    conda:
+        os.path.join(workflow.basedir,"envs/envs.yaml")
+    input:
+        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" +".vcf.gz")
+    output:
+        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".nonVariant" + ".vcf.gz")
+    threads:
+        1
+    shell:
+        """
+            bcftools view \
+                --max-ac=1 \
+                {input} | \
+                gzip \
+                >{output}
+        """
+
+
 rule QualityFiltering:
     conda:
         os.path.join(workflow.basedir,"envs/envs.yaml")
     input:
         os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" +".vcf.gz")
     output:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
+        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".variantHQ" + ".vcf.gz")
     threads:
         1
     shell:
@@ -78,6 +97,31 @@ rule QualityFiltering:
             --max-missing 0.5 | \
             gzip \
             > {output}
+        """
+
+rule mergeHQandNonVariant:
+    conda:
+        os.path.join(workflow.basedir,"envs/gatk4.yaml")
+    input:
+        non_variant=os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".nonVariant" + ".vcf.gz")
+        variant=os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".variantHQ" + ".vcf.gz")
+    output:
+        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
+    threads:
+        1
+    log:
+        os.path.join(config["outdir"],"logs","mergeVcfs","mergeHQvariantAndNonVariant.log")
+    resources:
+        mem_gb = int(round(get_total_memory_gb() * 0.8, 0))
+    shell:
+        """
+            gatk \
+            --java-options "-Xmx{resources.mem_gb}g" \
+            MergeVcfs \
+            {input.non_variant} {input.variant} \
+            O={output} \
+            > {log} \
+            2>{log}
         """
 
 rule SNPonly:
