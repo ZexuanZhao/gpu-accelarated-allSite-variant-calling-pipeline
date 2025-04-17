@@ -94,6 +94,7 @@ rule SNPonly:
             vcftools \
             --gzvcf {input} \
             --stdout --recode --recode-INFO-all \
-            --remove-indels \
+            --remove-indels | \
+            gzip \
             > {output}
         """
