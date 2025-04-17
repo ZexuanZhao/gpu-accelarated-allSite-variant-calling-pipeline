@@ -103,7 +103,7 @@ rule mergeHQandNonVariant:
     conda:
         os.path.join(workflow.basedir,"envs/gatk4.yaml")
     input:
-        non_variant=os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".nonVariant" + ".vcf.gz")
+        non_variant=os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".nonVariant" + ".vcf.gz"),
         variant=os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".variantHQ" + ".vcf.gz")
     output:
         os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
