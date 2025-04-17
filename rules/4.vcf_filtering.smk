@@ -118,7 +118,7 @@ rule mergeHQandNonVariant:
             gatk \
             --java-options "-Xmx{resources.mem_gb}g" \
             MergeVcfs \
-            {input.non_variant} {input.variant} \
+            I={input.non_variant} I={input.variant} \
             O={output} \
             > {log} \
             2>{log}
