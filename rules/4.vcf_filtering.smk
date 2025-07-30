@@ -31,7 +31,7 @@ rule lowComplexityBed:
                     parts = line.split("\t")
                     seq_name = parts[0].replace(">","")
                     seq_name = seq_name.split(" ")[0]
-                    start = int(parts[1]) - 1
+                    start = int(parts[1])
                     end = int(parts[2])
 
                     outfile.write(f"{seq_name}\t{start}\t{end}\n")
