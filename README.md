@@ -17,14 +17,7 @@ This repository contains a GPU-accelerated Snakemake workflow that calls both va
 
 ## Getting Started
 1. Prepare a sample sheet and edit `configuration/config.yaml` with project details and resource paths.
-2. Ensure Snakemake and Singularity are installed, then run the command shown in the [Usage](#usage) section with appropriate `--cores`, `--resources gpus`, and memory limits.
-
-## Next Steps
-- Learn Snakemake basics to customize rules and understand dependency graphs.
-- Explore GATK4’s best-practices for joint genotyping and filtering.
-- Review how Clara Parabricks accelerates GATK and BWA on GPUs.
-- Familiarize yourself with bcftools, bedtools, Qualimap, and MultiQC for QC and post-processing.
-- For scaling, study GenomicsDB and interval splitting strategies to optimize performance on large genomes.
+2. Ensure Snakemake and Singularity are installed (ideally by conda), then run the command shown in the [Usage](#usage) section with appropriate `--cores`, `--resources`, and memory limits.
 
 ## Files to prepare:
  - A sample sheet - sample_sheet.csv: a comma delimited file with 3 columns (no column name):
@@ -39,13 +32,12 @@ This repository contains a GPU-accelerated Snakemake workflow that calls both va
    - `split_n`: number of independent jobs of `gatk` for parallelism
    - `memory_gb_per_interval`: memory in Gb for each independent `gatk` job
 
-## Environment:
- - Make sure snakemake and singularity is installed in current environment.
+## Usage:
+`snakemake --use-conda --use-singularity --singularity-args '--nv -B .:/dum' --cores [ncpu] --resources gpus=[ngpu] mem_gb=[mem]`
 
 ## Notes:
- - `clara-parabricks` now require 38Gb memory for `fq2bam`. Therefore, `--low-memory` option is used.
+ - `clara-parabricks` now require 38Gb GPU memory for `fq2bam`. Therefore, `--low-memory` option is used in this step.
  - In snakemake command line (see below), `[ncpu]` should be larger than 20 as all resource usages are already hardcoded and some of rules uses more than 20 cpus.
  - In snakemake command line (see below), `[mem]` should not be more than 80% of the physical memory.
    
-## Usage:
-`snakemake --use-conda --use-singularity --singularity-args '--nv -B .:/dum' --cores [ncpu] --resources gpus=[ngpu] mem_gb=[mem]`
+
