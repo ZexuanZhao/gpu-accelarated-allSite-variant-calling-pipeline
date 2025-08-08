@@ -1,8 +1,30 @@
 # *ALLSITE* Variant Calling from Illumina Reads using GPU
 
-## Description:
- - A GPU-accelarated snakemake workflow that calls variants from multi-sample illumina reads using GATK4 GPU version.
- - It calls both variant and non-variant sites. Compatible with tools such as [`pixy`](https://pixy.readthedocs.io/en/latest/).
+## Overview
+This repository contains a GPU-accelerated Snakemake workflow that calls both variant and non-variant sites from multi-sample Illumina reads using the GATK4 GPU implementation in NVIDIA's Clara Parabricks container. The pipeline is compatible with tools such as [`pixy`](https://pixy.readthedocs.io/en/latest/). Users supply a sample sheet and a configuration YAML specifying project metadata, reference genome, output directory, container image, and pipeline parameters such as window size, number of intervals, and per-interval memory. Snakemake and Singularity must be installed, and runs should reserve ample CPU cores, GPU resources, and memory (≤80% of the host) because some rules require more than 20 threads and high memory usage.
+
+## Structure and Key Components
+- **Snakefile** – Imports the configuration and sample sheet, pulls in rule modules, and defines the final `all` target for QC reports and filtered VCFs.
+- **Environment definitions** – Conda YAMLs provide toolchains: `envs/envs.yaml` for general bioinformatics utilities, `envs/gatk4.yaml` for GATK, and `envs/blast.yaml` for low-complexity filtering via BLAST’s `dustmasker`.
+- **Rules** (in `rules/`):
+  - **0.qc.smk** – FastQC on trimmed reads, BAM stats, windowed coverage, Qualimap, bcftools and vcftools statistics, and a final MultiQC summary.
+  - **1.preprocessing.smk** – Trims raw FASTQ files with `fastp`, producing paired/unpaired reads and QC reports.
+  - **2.mapping.smk** – Copies and indexes the reference, then maps reads using Clara Parabricks’ GPU-accelerated `pbrun fq2bam` command, embedding read-group information and writing BAM files.
+  - **3.variant_calling.smk** – Runs GPU-enabled `pbrun haplotypecaller` per sample, splits the reference into N intervals, builds a GenomicsDB, genotypes all sites in parallel, and merges the interval VCFs.
+  - **4.vcf_filtering.smk** – Filters out low-quality and low-complexity regions, derives reference calls and high-quality SNPs, then merges them into an all-site VCF ready for downstream analyses.
+- **scripts/** – Includes a helper script to split a FASTA reference into evenly sized BED intervals, facilitating parallel joint genotyping.
+- **test_data/** – Provides example FASTQ files, a sample sheet, and a small reference for demonstration.
+
+## Getting Started
+1. Prepare a sample sheet and edit `configuration/config.yaml` with project details and resource paths.
+2. Ensure Snakemake and Singularity are installed, then run the command shown in the [Usage](#usage) section with appropriate `--cores`, `--resources gpus`, and memory limits.
+
+## Next Steps
+- Learn Snakemake basics to customize rules and understand dependency graphs.
+- Explore GATK4’s best-practices for joint genotyping and filtering.
+- Review how Clara Parabricks accelerates GATK and BWA on GPUs.
+- Familiarize yourself with bcftools, bedtools, Qualimap, and MultiQC for QC and post-processing.
+- For scaling, study GenomicsDB and interval splitting strategies to optimize performance on large genomes.
 
 ## Files to prepare:
  - A sample sheet - sample_sheet.csv: a comma delimited file with 3 columns (no column name):
