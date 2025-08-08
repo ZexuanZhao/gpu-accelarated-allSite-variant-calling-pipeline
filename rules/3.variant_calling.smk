@@ -146,7 +146,7 @@ rule mergeVcfs:
     input:
         expand(os.path.join(config["outdir"],"vcf",config["project"]+".{IID}"+".vcf.gz"), IID = range(1, config["split_n"]+1))
     output:
-        os.path.join(config["outdir"],"vcf",config["project"]+".allSite"+".vcf.gz")
+        os.path.join(config["outdir"],"vcf",config["project"]+".raw"+".vcf.gz")
     params:
         input_formatted = format_input_vcfs(expand(os.path.join(config["outdir"],"vcf",config["project"]+".{IID}"+".vcf.gz"), IID = range(1, config["split_n"]+1)))
     threads:
