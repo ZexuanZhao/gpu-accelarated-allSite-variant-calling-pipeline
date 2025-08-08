@@ -84,7 +84,7 @@ rule getRefCalls:
     shell:
         """
             bcftools view \
-                --max-ac=1 \
+                --max-ac=0 \
                 {input} \
                 -Oz -o {output}
         """
