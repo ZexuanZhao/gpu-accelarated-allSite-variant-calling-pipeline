@@ -56,7 +56,7 @@ rule removeLowComplexityVariant:
     conda:
         os.path.join(workflow.basedir,"envs/envs.yaml")
     input:
-        vcf = os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".vcf.gz")
+        vcf = os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".vcf.gz"),
         bed = os.path.join(config["outdir"],"ref","ref.lcm.bed")
     output:
         os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".vcf.gz")
