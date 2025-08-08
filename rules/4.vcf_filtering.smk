@@ -1,3 +1,18 @@
+rule removeLowQual:
+    conda:
+        os.path.join(workflow.basedir,"envs/envs.yaml")
+    input:
+        os.path.join(config["outdir"], "vcf", config["project"]+".raw"+".vcf.gz")
+    output:
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".vcf.gz")
+    threads:
+        1
+    shell:
+        """
+        bcftools filter --exclude FILTER="LowQual" {input} -o {output}
+        """
+
+
 rule lowComplexityAcclist:
     conda:
         os.path.join(workflow.basedir,"envs/blast.yaml")
@@ -41,10 +56,10 @@ rule removeLowComplexityVariant:
     conda:
         os.path.join(workflow.basedir,"envs/envs.yaml")
     input:
-        vcf = os.path.join(config["outdir"],"vcf",config["project"]+".allSite"+".vcf.gz"),
+        vcf = os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".vcf.gz")
         bed = os.path.join(config["outdir"],"ref","ref.lcm.bed")
     output:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" +".vcf.gz")
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".vcf.gz")
     threads:
         1
     shell:
@@ -57,56 +72,54 @@ rule removeLowComplexityVariant:
             > {output}
         """
 
-rule getNonVariant:
+rule getRefCalls:
     conda:
         os.path.join(workflow.basedir,"envs/envs.yaml")
     input:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" +".vcf.gz")
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".vcf.gz")
     output:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".nonVariant" + ".vcf.gz")
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".refCalls"+".vcf.gz")
     threads:
         1
     shell:
         """
             bcftools view \
                 --max-ac=1 \
-                {input} | \
-                gzip \
-                >{output}
+                {input} \
+                -Oz -o {output}
         """
 
 
-rule QualityFiltering:
+rule getHQSNPs:
     conda:
         os.path.join(workflow.basedir,"envs/envs.yaml")
     input:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" +".vcf.gz")
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".vcf.gz")
     output:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".variantHQ" + ".vcf.gz")
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.gz")
     threads:
         1
     shell:
         """
-            vcftools \
-            --gzvcf {input} \
-            --stdout --recode --recode-INFO-all \
-            --minQ 30 \
-            --max-alleles 2 \
-            --max-meanDP 50 \
-            --minGQ 20 \
-            --max-missing 0.5 | \
-            gzip \
-            > {output}
+            bcftools filter \
+                -S . -e 'FMT/GQ<20' \
+                {input} | \
+            bcftools filter \
+                -s 'FAIL' \
+                -e 'QUAL<30 || N_ALLELES>2 || AVG(FMT/DP)>50 || TYPE!="snp" || F_MISSING>0.5' | \
+            bcftools view \
+                -f 'PASS' \
+                -Oz -o {output} 
         """
 
-rule mergeHQandNonVariant:
+rule mergeRefCallsAndHQSNPs:
     conda:
         os.path.join(workflow.basedir,"envs/gatk4.yaml")
     input:
-        non_variant=os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".nonVariant" + ".vcf.gz"),
-        variant=os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".variantHQ" + ".vcf.gz")
+        non_variant=os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".refCalls"+".vcf.gz"),
+        variant=os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.gz")
     output:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
+        os.path.join(config["outdir"], "vcf_final", config["project"]+".removeLowQual"+".lcm"+".allSite"+".vcf.gz")
     threads:
         1
     log:
@@ -122,23 +135,4 @@ rule mergeHQandNonVariant:
             O={output} \
             > {log} \
             2>{log}
-        """
-
-rule SNPonly:
-    conda:
-        os.path.join(workflow.basedir,"envs/envs.yaml")
-    input:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
-    output:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".SNPonly" + ".lcm" + ".HQ" + ".vcf.gz")
-    threads:
-        1
-    shell:
-        """
-            vcftools \
-            --gzvcf {input} \
-            --stdout --recode --recode-INFO-all \
-            --remove-indels | \
-            gzip \
-            > {output}
         """
