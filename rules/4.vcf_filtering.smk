@@ -108,9 +108,10 @@ rule getHQSNPs:
                 {input} | \
             bcftools filter \
                 -s 'FAIL' \
-                -e 'QUAL<{config[qual_min]} || N_ALLELES>2 || AVG(FMT/DP)>{config[dp_max]} || TYPE!="snp" || F_MISSING>{config[f_missing_max]}' | \
+                -e 'QUAL<{config[qual_min]} || AVG(FMT/DP)>{config[dp_max]} || TYPE!="snp" || F_MISSING>{config[f_missing_max]}' | \
             bcftools view \
                 -f 'PASS' \
+                -m2 -M2 \
                 -Oz -o {output}
         """
 
