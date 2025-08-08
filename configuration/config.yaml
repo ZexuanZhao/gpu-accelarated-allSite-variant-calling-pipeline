@@ -10,7 +10,7 @@ outdir: "test_variant_calling"
 clara-parabricks: "docker://nvcr.io/nvidia/clara/clara-parabricks:4.4.0-1"
 
 ## Some parameters
-### windows size for calculate coverages
+### window size for calculating coverage
 w_size: 100000
 ### number of intervals to call variants independently as gatk don't do parallelism by default
 split_n: 100
