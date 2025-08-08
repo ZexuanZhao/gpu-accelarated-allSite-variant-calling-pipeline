@@ -1,5 +1,5 @@
 def get_fastq(wildcards):
-    fastqs = sample_sheet.loc[(wildcards), ["r1", "r2"]].dropna()
+    fastqs = sample_sheet.loc[wildcards.sample, ["r1", "r2"]].dropna()
     return {"r1": fastqs.r1, "r2": fastqs.r2}
 
 def get_fastq2(wildcards):
