@@ -85,8 +85,10 @@ rule getRefCalls:
         """
             bcftools view \
                 --max-ac=0 \
-                {input} \
-                -Oz -o {output}
+                {input} | \
+            bcftools view \
+                -i 'COUNT(GT="mis")/N_SAMPLES <= {config[f_missing_max]}' \
+                  -Oz -o {output}
         """
 
 
