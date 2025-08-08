@@ -9,7 +9,7 @@ rule removeLowQual:
         1
     shell:
         """
-        bcftools filter --exclude FILTER="LowQual" {input} -o {output}
+        bcftools filter --exclude 'FILTER~"LowQual"' {input} -o {output}
         """
 
 
