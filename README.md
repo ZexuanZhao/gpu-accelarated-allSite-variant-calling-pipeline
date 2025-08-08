@@ -32,6 +32,14 @@ This repository contains a GPU-accelerated Snakemake workflow that calls both va
    - `split_n`: number of independent jobs of `gatk` for parallelism
    - `memory_gb_per_interval`: memory in Gb for each independent `gatk` job
 
+## Filtering parameters
+The following configuration options adjust variant filtering in `rules/4.vcf_filtering.smk`:
+
+- `gq_min`: minimum genotype quality to keep a call (default `20`).
+- `qual_min`: minimum site QUAL score (default `30`).
+- `dp_max`: maximum average depth across samples (default `50`).
+- `f_missing_max`: maximum allowed fraction of missing genotypes (default `0.5`).
+
 ## Usage:
 `snakemake --use-conda --use-singularity --singularity-args '--nv -B .:/dum' --cores [ncpu] --resources gpus=[ngpu] mem_gb=[mem]`
 
