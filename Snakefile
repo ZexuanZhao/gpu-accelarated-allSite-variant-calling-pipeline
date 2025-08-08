@@ -23,7 +23,7 @@ rule all:
         bam_report = expand(os.path.join(config["outdir"],"qc","coverage","{sample}_coverage.txt"), sample = sample_sheet.index),
         vcf_plot = os.path.join(config["outdir"],"qc","bcftools_stats","plot-vcfstats.log"),
         het = os.path.join(config["outdir"], "qc", "vcftools", config["project"]+".het"),
-        vcf = os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.stats")
+        vcf = os.path.join(config["outdir"], "vcf_final", config["project"]+".removeLowQual"+".lcm"+".allSite"+".vcf.gz")
     shell:
         """
         echo "Job done!"
