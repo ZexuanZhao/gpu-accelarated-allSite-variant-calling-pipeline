@@ -29,19 +29,17 @@ rule createIntervals:
     conda:
         os.path.join(workflow.basedir,"envs/envs.yaml")
     input:
-        os.path.join(config["outdir"],"ref","ref.fasta.fai")
+        os.path.join(config["outdir"],"ref","ref.fasta")
     output:
         expand(os.path.join(config["outdir"],"ref","ref.splitted.{IID}.bed"), IID = range(1, config["split_n"]+1))
     params:
-        tmp_bed = os.path.join(config["outdir"],"ref", "ref.toBeSplit.bed"),
-        split_prefix = os.path.join(config["outdir"],"ref", "ref.splitted"),
-        split_size = config["genome_size"] // config["split_n"] + 1
+        out_dir = os.path.join(config["outdir"], "ref"),
+        split_n = config["split_n"]
     threads:
         1
     shell:
         """
-        bedtools makewindows -g {input} -w {params.split_size} > {params.tmp_bed}
-        bash scripts/split_bed_by_size.sh {params.tmp_bed} {params.split_prefix} {params.split_size} 
+        python scripts/split_fasta_into_n_bed.py {input} {params.split_n} --out_dir {params.out_dir} --prefix ref
         """
 
 rule sampleNameMap:
