@@ -97,9 +97,9 @@ rule vcf_stats:
     conda:
         os.path.join(workflow.basedir, "envs/envs.yaml")
     input:
-        os.path.join(config["outdir"],"vcf", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.gz")
     output:
-        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.stats")
+        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.stats")
     threads:
         1
     shell:
@@ -112,7 +112,7 @@ rule plot_vcfstats:
     conda:
         os.path.join(workflow.basedir, "envs/envs.yaml")
     input:
-        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.stats")
+        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.stats")
     output:
         os.path.join(config["outdir"],"qc","bcftools_stats", "plot-vcfstats.log")
     params:
@@ -132,7 +132,7 @@ rule qc_vcf:
     conda:
         os.path.join(workflow.basedir, "envs/envs.yaml")
     input:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".SNPonly" + ".lcm" + ".HQ" + ".vcf.gz")
+        os.path.join(config["outdir"], "vcf_filtered", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.gz")
     output:
         os.path.join(config["outdir"], "qc", "vcftools", config["project"]+".het")
     params:
@@ -162,7 +162,7 @@ rule multiqc:
         expand(os.path.join(config["outdir"],"qc", "fastqc", "{sample}.{R}_fastqc.zip"), sample= sample_sheet.index, R=["1P", "2P"]),
         expand(os.path.join(config["outdir"], "qc", "bamtools","{sample}_bamtools.stats"), sample= sample_sheet.index),
         expand(os.path.join(config["outdir"],"qc","fastp","{sample}.fastp.json"), sample= sample_sheet.index),
-        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.stats")
+        os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"]+".removeLowQual"+".lcm"+".HQSNPs"+".vcf.stats")
     output:
         os.path.join(config["outdir"],"qc","multiqc", config["project"]+"_multiqc_report.html")
     params:
