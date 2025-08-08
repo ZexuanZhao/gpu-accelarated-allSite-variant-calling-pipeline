@@ -102,14 +102,14 @@ rule getHQSNPs:
     shell:
         """
             bcftools filter \
-                -S . -e 'FMT/GQ<20' \
+                -S . -e 'FMT/GQ<{config[gq_min]}' \
                 {input} | \
             bcftools filter \
                 -s 'FAIL' \
-                -e 'QUAL<30 || N_ALLELES>2 || AVG(FMT/DP)>50 || TYPE!="snp" || F_MISSING>0.5' | \
+                -e 'QUAL<{config[qual_min]} || N_ALLELES>2 || AVG(FMT/DP)>{config[dp_max]} || TYPE!="snp" || F_MISSING>{config[f_missing_max]}' | \
             bcftools view \
                 -f 'PASS' \
-                -Oz -o {output} 
+                -Oz -o {output}
         """
 
 rule mergeRefCallsAndHQSNPs:

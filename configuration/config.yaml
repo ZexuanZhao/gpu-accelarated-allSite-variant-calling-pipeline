@@ -16,3 +16,9 @@ w_size: 100000
 split_n: 100
 ### memory limit for EACH interval (Gb)
 memory_gb_per_interval: 1
+
+## Filtering parameters
+gq_min: 20
+qual_min: 30
+dp_max: 50
+f_missing_max: 0.5
