@@ -14,7 +14,6 @@
    - `outdir`: path to the output directory
    - `clara-parabricks`: path to the [clara-parabricks](https://docs.nvidia.com/clara/parabricks/latest/index.html) image, e.g. "docker://nvcr.io/nvidia/clara/clara-parabricks:4.4.0-1"
    - `w_size`: non-overlapping window size for reporting sequencing depths across the genome
-   - `genome_size`: reference genome size in bp
    - `split_n`: number of independent jobs of `gatk` for parallelism
    - `memory_gb_per_interval`: memory in Gb for each independent `gatk` job
 
