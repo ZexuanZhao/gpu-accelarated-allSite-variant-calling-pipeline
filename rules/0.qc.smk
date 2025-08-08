@@ -73,7 +73,7 @@ rule Qualimap:
     input:
         bam=os.path.join(config["outdir"],"bam","{sample}.bam")
     output:
-        os.path.join(config["outdir"],"qc","qualimap","{sample}", "qualimapReport.html")
+        os.path.join(config["outdir"],"qc", "qualimap","{sample}", "qualimapReport.html")
     params:
         outdir =  os.path.join(config["outdir"],"qc","qualimap","{sample}")
     threads:
@@ -97,7 +97,7 @@ rule vcf_stats:
     conda:
         os.path.join(workflow.basedir, "envs/envs.yaml")
     input:
-        os.path.join(config["outdir"],"vcf",config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
+        os.path.join(config["outdir"],"vcf", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.gz")
     output:
         os.path.join(config["outdir"],"qc", "bcftools_stats", config["project"] + ".allSite" + ".lcm" + ".HQ" + ".vcf.stats")
     threads:
